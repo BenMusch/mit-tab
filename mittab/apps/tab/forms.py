@@ -290,20 +290,29 @@ class EBallotForm(ResultEntryForm):
                     msg += "for this round."
                     self._errors["ballot_code"] = self.error_class([msg])
 
+                if int(cleaned_data["winner"]) not in [Round.GOV, Round.OPP]:
+                    message = "Go to tab to submit a result other than a win or loss."
+                    self._errors["winner"] = self.error_class([message])
+
+                for d in (self.GOV + self.OPP):
+                    speaks = cleaned_data.get("%s_speaks" % d)
+                    split = str(speaks).split(".")
+                    if len(split) == 2 and int(split[-1]) not in [0, 25, 5, 50, 75]:
+                        # speaks do not end in quarter points
+                        msg = "Speaks must be given in quarter points."
+                        self._errors["%s_speaks" % d] = self.error_class([msg])
+                    elif speaks >= 26.75 or speaks <= 23.25:
+                        msg = "Speaks must be justified to tab."
+                        self._errors["%s_speaks" % d] = self.error_class([msg])
+
             if int(cleaned_data["winner"]) not in [Round.GOV, Round.OPP]:
                 message = "Go to tab to submit a result other than a win or loss."
                 self._errors["winner"] = self.error_class([message])
 
             for d in (self.GOV + self.OPP):
                 speaks = cleaned_data.get("%s_speaks" % d)
-                split = str(speaks).split(".")
-                if len(split) == 2 and int(split[-1]) not in [0, 25, 5, 50, 75]:
-                    # speaks do not end in quarter points
-                    msg = "Speaks must be given in quarter points."
-                    self._errors["%s_speaks" % d] = self.error_class([msg])
-                elif speaks >= 26.75 or speaks <= 23.25:
-                    msg = "Speaks must be justified to tab."
-                    self._errors["%s_speaks" % d] = self.error_class([msg])
+                if speaks >= 26.75 or speaks <= 23.25:
+                    self._errors["%s_speaks" % d] = self.error_class(["Speaks must be justified to tab."])
         except Exception, e:
             print "Caught error %s" %(e)
             self._errors["winner"] = self.error_class(["Non handled error, preventing data contamination"])

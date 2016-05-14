@@ -440,7 +440,7 @@ def view_rounds(request):
 
 def e_ballots(request):
     if request.method == 'POST':
-        return redirect('/e_ballots/%s' % request.POST.get('ballot_code'))
+        return redirect('/e_ballots/%s' % request.POST.get('ballot_code').lower())
     else:
         return render(request, 'e_ballot_search.html')
 
