@@ -439,9 +439,7 @@ def view_rounds(request):
                               context_instance=RequestContext(request))
 
 def e_ballots(request):
-<<<<<<< 9a0f4d8b5c1c66418346ec9edb2661ff7b8f6851
     if request.method == 'POST':
-        print request.POST
         return redirect('/e_ballots/%s' % request.POST.get('ballot_code'))
     else:
         return render(request, 'e_ballot_search.html')
@@ -470,13 +468,9 @@ def enter_e_ballot(request, ballot_code):
                         'error_info': message})
     else:
         return enter_result(request, rounds.first().id, True)
-
-def enter_result(request, round_id, e_ballot=False):
-=======
     return render('e_ballot_search.html')
 
-def enter_result(request, round_id):
->>>>>>> eballot form
+def enter_result(request, round_id, e_ballot=False):
     round_obj = Round.objects.get(id=round_id)
     if request.method == 'POST':
         if e_ballot:
