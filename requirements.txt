@@ -1,9 +1,12 @@
--e .
 Django==1.6.1
-wsgiref==0.1.2
-South==0.8.4
+django-localflavor==1.0
+-e git+https://github.com/BenMusch/mit-tab.git@2b57baeaeebb14055dfe43e36a4ed0924f799ef9#egg=mittab
 mock==1.0.1
+py==1.4.31
 pytest==2.4.2
 django-localflavor==1.0
 xlrd==0.9.4
 xlwt==1.0.0
+South==0.8.4
+gunicorn
+dj_static
