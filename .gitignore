@@ -42,4 +42,7 @@ nosetests.xml
 venv/.Python
 venv/include/*
 venv/pip-selfcheck.json
+
+# Digital Ocean config
 *.sqlite3
+mittab/settings.py
