@@ -101,7 +101,6 @@ def pair_round(request):
                 current_round.save()
             backup.backup_round("round_%i_after_pairing.db" % (current_round_number))
         except Exception as exp:
-            traceback.print_exc(file=sys.stdout)
             return render_to_response('error.html',
                                       {'error_type': "Pair Next Round",
                                        'error_name': "Pairing Round %s" % (current_round.value + 1),
