@@ -9,3 +9,4 @@ South==0.8.4
 static3==0.7.0
 xlrd==0.9.4
 xlwt==1.0.0
+rollbar==0.13.6

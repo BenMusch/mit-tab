@@ -53,6 +53,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'mittab.apps.tab.middleware.Login',
     'django.middleware.transaction.TransactionMiddleware', #Be careful about ordering
+    'rollbar.contrib.django.middleware.RollbarNotifierMiddleware',
 )
 
 ROOT_URLCONF = 'mittab.urls'
@@ -115,3 +116,11 @@ EMAIL_HOST_PASSWORD = os.environ['SENDGRID_PASSWORD']
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EBALLOT_BACKUP_EMAIL = 'northeasterntab2016@gmail.com'
+
+# Rollbar configuration
+ROLLBAR = {
+        'access_token': os.environ['ROLLBAR_TOKEN'],
+        'environment': 'development' if DEBUG else 'production',
+        'branch': 'benmusch/digital-ocean',
+        'root': '/home/django/mittab'
+}
