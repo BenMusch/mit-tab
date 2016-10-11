@@ -2,6 +2,8 @@ from django.db import models
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
+from mittab import settings
 from models import *
 from decimal import Decimal
 import itertools
@@ -45,7 +47,7 @@ class JudgeForm(forms.ModelForm):
                                                                        required = False)
             except:
                 pass
-            
+
     def save(self, force_insert=False, force_update=False, commit=True):
         judge = super(JudgeForm, self).save(commit)
         num_rounds = TabSettings.objects.get(key="tot_rounds").value
@@ -60,12 +62,12 @@ class JudgeForm(forms.ModelForm):
                     checked_in.save()
                 elif checked_in and not should_be_checked_in:
                     checked_in.delete()
-                    
+
         return judge
-                
+
     class Meta:
         model = Judge
-        
+
 
 class TeamForm(forms.ModelForm):
     debaters = forms.ModelMultipleChoiceField(queryset=Debater.objects.all(), 
@@ -279,10 +281,9 @@ class EBallotForm(ResultEntryForm):
                     # If the judge is not paired into the round this ballot is for
                     msg = "You are not juding this round."
                     self._errors["ballot_code"] = self.error_class([msg])
-                elif ballot_code != first.chair.ballot_code:
-                    # If the judge is not the chair of this round
-                    msg = "Only the chair of a panel can submit ballot."
-                    self._errors["ballot_code"] = self.error_class([msg])
+                    # TODO ensure judge is the chair of the panel
+                    # (this requires fixing a bug when judges a manually changed
+                    # but the chair of the panel isn't)
                 elif RoundStats.objects.filter(round=first).first():
                     # If there was already a ballot submitted for the round
                     msg =  "A ballot has already been completed for this round."
@@ -309,6 +310,21 @@ class EBallotForm(ResultEntryForm):
             self._errors["winner"] = self.error_class(["Non handled error, preventing data contamination"])
 
         return super(EBallotForm, self).clean()
+
+    def save(self):
+        cleaned_data = self.cleaned_data
+        cur_round = int(TabSettings.get(key="cur_round")) - 1
+        try:
+            judge = Judge.objects.filter(ballot_code=ballot_code).first()
+            subj = "E-Ballot submission (Round: %s, Judge: %s)" % (cur_round, judge.name)
+            msg = str(self.cleaned_data)
+        except Exception, e:
+            subj = "Error sending back-up"
+            msg = "Error: %s" % e
+            msg += "\n"
+            msg += "Raw data: %s" % self.cleaned_data
+        send_mail(subj, msg, "e-ballots@nu-tab.me", settings.EBALLOT_BACKUP_EMAIL)
+        super(EBallotForm, self).save()
 
 def validate_panel(result):
     all_good = True
