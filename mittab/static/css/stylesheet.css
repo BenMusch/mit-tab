@@ -159,6 +159,7 @@ div.index_header {
     display: block;
     font-size: 20px;
     color: black;
+    padding: 0.2em;
 }
 
 .w100 {
@@ -225,7 +226,8 @@ th.header {
 
 div#banner {
     font-size: 25px;
-    padding: .2em;
+    padding-bottom: .4em;
+    padding-top: .4em;
 }
 
 div.mittab-content {

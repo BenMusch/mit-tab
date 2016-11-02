@@ -913,8 +913,8 @@
 }
 
 .team_container {
-  padding: 5px;
-  border: 1px solid black;
+  padding: 20px;
+  border: 1px solid lightgrey;
 }
 
 .gov, .opp {
@@ -930,5 +930,3 @@
 .speaks input {
   height: 30px;
 }
-Status API Training Shop Blog About
-© 2016 GitHub, Inc. Terms Privacy Security Contact Help

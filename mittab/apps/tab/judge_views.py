@@ -28,7 +28,7 @@ def view_judges(request):
 
         if judge.rank < 3.0:
             result |= TabFlags.LOW_RANKED_JUDGE
-        if judge.rank >= 3.0 and judge.rank < 5.0:
+        if 3.0 <= judge.rank < 5.0:
             result |= TabFlags.MID_RANKED_JUDGE
         if judge.rank >= 5.0:
             result |= TabFlags.HIGH_RANKED_JUDGE
@@ -42,6 +42,7 @@ def view_judges(request):
                   TabFlags.JUDGE_NOT_CHECKED_IN_NEXT],
                  [TabFlags.LOW_RANKED_JUDGE, TabFlags.MID_RANKED_JUDGE, TabFlags.HIGH_RANKED_JUDGE]]
     filters, symbol_text = TabFlags.get_filters_and_symbols(all_flags)
+
     print filters
     return render_to_response('list_data.html',
                               {'item_type': 'judge',
@@ -94,7 +95,7 @@ def view_judge(request, judge_id):
         return render_to_response('data_entry.html',
                                   {'form': form,
                                    'links': links,
-                                   'title': "Viewing Judge: %s" % (judge.name)},
+                                   'title': "Viewing Judge: %s" % (judge.name + " (" +judge.ballot_code + ")")},
                                   context_instance=RequestContext(request))
 
 

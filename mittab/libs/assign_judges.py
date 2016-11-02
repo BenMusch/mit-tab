@@ -233,8 +233,11 @@ def had_judge(j, t):
 
 def can_judge_teams(list_of_judges, team1, team2):
     """
+    Returns a list of judges who can jduge both 'team1' and 'team2'. This method is used by the alternative judges
+    dropdown menu in the pairing_views to populate the list of judges seen when one clicks on the judge names when one
+    views the current pairings in MIT-tab.
     :param list_of_judges: list of judges
-    :return: Returns the number of judges who can judge both 'team1' and 'team2'
+    :return: Returns a list of judges who can judge both 'team1' and 'team2'
     """
     result = []
     for judge in list_of_judges:

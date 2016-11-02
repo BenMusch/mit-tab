@@ -4,7 +4,7 @@
 
 {% block content %}
 <div id="round_info">
-    <h2>Round Status for Round: {{round_number}} </h2>
+    <h2>Round Status for Round {{round_number}} </h2>
     <h3 class="pairing_exists"> We have {% if valid_pairing %} a valid {% else %} an invalid {% endif %} Pairing: </h2>
     {% if not valid_pairing %}
     {{errors}}
@@ -48,7 +48,7 @@
             <table class="table table-condensed table-second-striped table-bordered ">
                 <tr><th>Team</th>
                     <th>Role</th>
-                    <th>Ws/Ss/Gs/Os</th>
+                    <th>Wins, Speaks, Govs, Opps</th>
                     <th>Judges</th>
                     <th title="Maximum gap in ranks between panel judge and panelists" >Panel Gap</th>
                     <th>Room</th>
@@ -67,7 +67,7 @@
                             <a class="btn btn-link" href="/team/card/{{pairing.gov_team.id}}">Loading Team Info...</a>
                         </td>
                         <td class="judge" rowspan=2>
-                        {% for judge in pairing.judges.all %} 
+                        {% for judge in pairing.judges.all %}
                             <span class="full_width btn-group block-tight"
                                 round-id="{{pairing.id}}"
                                 judge-id="{{judge.id}}">
@@ -81,7 +81,7 @@
                         {% for slot in judge_slots %}
                         {% if pairing.judges.all|length < slot %}
                             <span class="full_width unassigned btn-group block-tight"
-                                round-id="{{pairing.id}}"> 
+                                round-id="{{pairing.id}}">
                                 <a class="btn btn-link dropdown-toggle" data-toggle="dropdown"
                                     round-id="{{pairing.id}}" judge-pos="{{slot}}" href="#">NA
                                 </a>
@@ -98,7 +98,7 @@
 
                             {% if pairing.victor == 1 %}
                             <a class="btn btn-success" href="/round/{{pairing.id}}/result/">GOV win</a></li>
-                            {% else %}{% if pairing.victor == 2 %} 
+                            {% else %}{% if pairing.victor == 2 %}
                             <a class="btn btn-success" href="/round/{{pairing.id}}/result/">OPP win</a></li>
                             {% else %}{% if pairing.victor == 3 %}
                             <a class="btn btn-success" href="/round/{{pairing.id}}/result/">GOV via Forfeit</a></li>
@@ -114,8 +114,7 @@
                             {% endif %}{% endif %}{%endif%}
 
                             {% if pairing.judges.all|length > 1 %}
-                            <br>
-                            <br>
+                                <br />
                             <a class="btn btn-warning" href="/round/{{pairing.id}}/result/{{pairing.judges.all|length}}/">Enter Panel</a></li>
                             {% endif %}
 

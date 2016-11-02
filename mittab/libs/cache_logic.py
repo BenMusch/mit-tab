@@ -6,7 +6,11 @@ from django.core.cache import cache as _djcache
 
 CACHE_TIMEOUT = 20
 
+# TODO make this work
+# TODO go to tab_logic, return all the cache tags
 
+# it is also worthwhile to note that the cache system, if it did ever work, would have timed out in 20 seconds, which
+# means that its impact on MIT-tab speed would have been marginal regardless.
 def cache(seconds=CACHE_TIMEOUT, stampede=CACHE_TIMEOUT):
     """
         Cache the result of a function call for the specified number of seconds, 

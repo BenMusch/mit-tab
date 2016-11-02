@@ -14,10 +14,10 @@ import mittab.libs.assign_judges as assign_judges
 import mittab.libs.backup as backup
 import mittab.libs.cache_logic as cache_logic
 import mittab.libs.tab_logic as tab_logic
-from errors import *
-from forms import ResultEntryForm, UploadBackupForm, score_panel, validate_panel, EBallotForm
+from mittab.apps.tab.errors import *
+from mittab.apps.tab.forms import ResultEntryForm, UploadBackupForm, score_panel, validate_panel, EBallotForm
+from mittab.apps.tab.models import *
 from mittab.libs.errors import *
-from models import *
 
 
 @permission_required('tab.tab_settings.can_change', login_url="/403/")
@@ -325,7 +325,7 @@ def view_round(request, round_number, errors=None):
 
 def alternative_judges(request, round_id, judge_id=None):
     round_obj = Round.objects.get(id=int(round_id))
-    round_number = round_obj.round_number
+    round_num = round_obj.round_number
     round_gov, round_opp = round_obj.gov_team, round_obj.opp_team
     # All of these variables are for the convenience of the template
     try:
@@ -336,16 +336,18 @@ def alternative_judges(request, round_id, judge_id=None):
     except TypeError:
         current_judge_id, current_judge_obj, current_judge_rank = "", "", ""
         current_judge_name = "No judge"
-    excluded_judges = Judge.objects.exclude(judges__round_number=round_number) \
-        .filter(checkin__round_number=round_number)
-    included_judges = Judge.objects.filter(judges__round_number=round_number) \
-        .filter(checkin__round_number=round_number)
+
+    # get the judges who are currently paired in (excluded_judges) and not (included_judges)
+    excluded_judges = Judge.objects.exclude(judges__round_number=round_num).filter(checkin__round_number=round_num)
+    included_judges = Judge.objects.filter(judges__round_number=round_num).filter(checkin__round_number=round_num)
+
     excluded_judges = [(j.name, j.id, float(j.rank))
                        for j in
                        assign_judges.can_judge_teams(excluded_judges, round_gov, round_opp)]
     included_judges = [(j.name, j.id, float(j.rank))
                        for j in
                        assign_judges.can_judge_teams(included_judges, round_gov, round_opp)]
+
     included_judges = sorted(included_judges, key=lambda x: -x[2])
     excluded_judges = sorted(excluded_judges, key=lambda x: -x[2])
 
@@ -501,6 +503,8 @@ def enter_result(request, round_id, e_ballot=False):
     round_obj = Round.objects.get(id=round_id)
 
     if request.method == 'POST':
+        # TODO implement some way to verify that the submitted e-ballot is the correct one for that round
+        # TODO also implement some way to verify that the correct winner was selected given equal speaks and ranks
         if e_ballot:
             form = EBallotForm(request.POST, round_instance=round_obj)
         else:
@@ -521,7 +525,6 @@ def enter_result(request, round_id, e_ballot=False):
                                       context_instance=RequestContext(request))
 
     else:
-        # TODO implement some way to verify that the submitted e-ballot is the correct one for that round
         # is_current = (round_obj.round_number == TabSettings.objects.get(key="cur_round"))
         if e_ballot:
             form = EBallotForm(round_instance=round_obj)
@@ -626,6 +629,10 @@ def start_new_tourny(request):
         TabSettings.objects.create(key="var_teams_to_break", value=8)
         TabSettings.objects.create(key="nov_teams_to_break", value=4)
         TabSettings.objects.create(key="lenient_late", value=0)  # why didn't someone add this earlier?
+
+        # customisation for justification bars
+        EBallotSettings.objects.create(key="justify_top", value=26.5)
+        EBallotSettings.objects.create(key="justify_bottom", value=23.5)
 
     except Exception as e:
         return render_to_response('error.html',

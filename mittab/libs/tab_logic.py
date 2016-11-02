@@ -13,6 +13,7 @@ from mittab.apps.tab.models import *
 Pairing methods
 """
 
+
 def pair_round():
     """
     Pair the next round of debate.
@@ -536,11 +537,13 @@ def double_adjusted_ranks(team):
     ranks = sorted([item for sublist in ranks for item in sublist])
     return sum(ranks[2:-2])
 
+
 """
 Miscallaneous team methods:
     Stuff like Opp-strength, listings for teams, default methods for varsity and novice breaks (based entire on speaks)
     so if you don't use that tab-policy, do not use those functions.
 """
+
 
 def opp_strength(t):
     opp_record = 0
@@ -625,6 +628,7 @@ def rank_teams_except_record(teams):
 
 def rank_nov_teams():
     return sorted(all_nov_teams(), key=team_score)
+
 
 """
 Debater speaks calculation methods

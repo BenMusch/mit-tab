@@ -14,7 +14,7 @@ class TabSettings(models.Model):
     tournament is started.
     """
     key = models.CharField(max_length=20)
-    value = models.IntegerField()
+    value = models.PositiveIntegerField()
 
     def __unicode__(self):
         return "%s => %s" % (self.key, self.value)
@@ -34,7 +34,7 @@ class TabSettings(models.Model):
             obj = cls.objects.get(key=key)
             obj.value = value
             obj.save()
-        except Exception as e:
+        except Exception:
             obj = cls.objects.create(key=key, value=value)
 
 
