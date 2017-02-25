@@ -5,7 +5,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext, loader
 
 from forms import SchoolForm, RoomForm, UploadDataForm, ScratchForm
-from mittab.libs.data_import import import_judges, import_rooms, import_teams
+from mittab.libs.data import import_judges, import_rooms, import_teams
 from mittab.libs.tab_logic import TabFlags
 from models import *
 
@@ -395,14 +395,14 @@ def view_scratches(request):
 
 # End Scratches
 '''
-Functions for batch data import from Excel files. See mittab.libs.data_import
+Functions for batch data import from Excel files. See mittab.libs.data
 '''
 
 
 def upload_data(request):
     """
     Look at the UploadDataForm to find the input form. From there, there are three files whcih are provided, each one is
-    checked for its existence first. Then, it is imported. Check the important logic in mittab.libs.data_import to see
+    checked for its existence first. Then, it is imported. Check the important logic in mittab.libs.data to see
     exactly how that data is imported from Excel files.
 
     The program first looks at whether it is a POST request. If it is not, then it returns a new form.
@@ -448,6 +448,7 @@ def upload_data(request):
                                        'results': True,
                                        'data_results': results},
                                       context_instance=RequestContext(request))
+
     else:
         form = UploadDataForm()
     return render_to_response('data_entry.html',

@@ -433,7 +433,7 @@ def forfeited_round(r, t):
         return False
 
 
-###Return true if the team won the round because the other team forfeited, otherwise return false
+# Return true if the team won the round because the other team forfeited, otherwise return false
 def won_by_forfeit(r, t):
     if Round.objects.filter(gov_team=t, round_number=r.round_number).count() > 0:
         if r.victor == Round.GOV_VIA_FORFEIT or r.victor == Round.ALL_WIN:

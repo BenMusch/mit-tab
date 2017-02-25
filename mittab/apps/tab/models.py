@@ -60,12 +60,11 @@ class School(models.Model):
 
 class Debater(models.Model):
     """
-    Contains information with regard to the debaters at the tournament.
+    Contains debater information
     """
-    # TODO it's honestly probably better to make a super-class containing the provider, phone, and name information.
-    # Then, make the Judge and the Debater classes extend that class.
+
+    # debater name
     name = models.CharField(max_length=30, unique=True)
-    """ name is the name of the Debater """
 
     # team_set is created by Team in the ManyToMany
     # team = models.ForeignKey('Team')
@@ -77,14 +76,14 @@ class Debater(models.Model):
         (NOVICE, u'Novice'),
     )
 
+    # debater phone number
     phone = PhoneNumberField(blank=True)
-    """ field for the debater's phone number """
 
+    # debater provider number
     provider = models.CharField(max_length=40, blank=True)
-    """ field for the provider of the debater"""
 
+    # debater novice status number
     novice_status = models.IntegerField(choices=NOVICE_CHOICES)
-    """ field for whether the debater is a novice or not """
 
     def __unicode__(self):
         return self.name
@@ -102,8 +101,9 @@ class Team(models.Model):
     Contains information with regard to the team itself. Contains the team name, the team school, the debaters in that
     team, the team seed, and the information on whetehr that team is checked in or not.
     """
-    alphanumeric = RegexValidator(r'^[0-9a-zA-Z ]*$', 'Only alphanumeric characters are allowed.')
-    name = models.CharField(max_length=30, unique=True, validators=[alphanumeric])
+    # alphanumeric = RegexValidator(r'^[0-9a-zA-Z ]*$', 'Only alphanumeric characters are allowed.')
+    # name = models.CharField(max_length=30, unique=True, validators=[alphanumeric])
+    name = models.CharField(max_length=30, unique=True)
     school = models.ForeignKey('School')
     debaters = models.ManyToManyField(Debater)
 
@@ -139,7 +139,7 @@ class Judge(models.Model):
     """ rank of the judge, must have less than 4 digits and less than 2 decimal places """
 
     schools = models.ManyToManyField(School)
-    """judge schools (takes many, because some dinos (ahem.) have like 4 or 5 affiliations for some reason...) """
+    """judge schools (takes many, because some dinos have like 4 affiliations for some reason) """
 
     phone = PhoneNumberField(blank=True)
     """ judge phone number """

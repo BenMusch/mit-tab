@@ -50,24 +50,27 @@ def import_rooms(fileToImport):
             return room_errors
 
     for i in range(1, num_rooms):
+
+        # headers are
+        # name, room rank
+
         room_name = sh.cell(i, 0).value
         if room_name == '':
-            room_errors.append("Row " + str(i) + ": Empty Room Name")
+            room_errors.append("Row " + str(i) + ": Empty room name")
             continue
-        try:
-            Room.objects.get(name=room_name)
-            room_errors.append(room_name + ': Duplicate Room Name')
-            continue
-        except:
-            pass
+
+        duplicate = False
+        if Room.objects.filter(name=room_name).first() is not None:  # check for duplicates
+            room_errors.append(room_name + ': Duplicate room name')
+            duplicate = True
 
         # Load and validate room_rank
         room_rank = sh.cell(i, 1).value
         try:
             # auto-round to two floating point digits
             room_rank = round(Decimal(room_rank), 2)
-        except:
-            room_errors.append(room_name + ": Rank not number")
+        except TypeError or ValueError:
+            room_errors.append(room_name + ": Rank in file is not a number")
             continue
 
         # cap room rank at 100
@@ -79,10 +82,16 @@ def import_rooms(fileToImport):
             room_rank = 0
 
         # Create the room
-        room = Room(name=room_name, rank=room_rank);
+        if not duplicate:
+            room = Room(name=room_name, rank=room_rank)
+
+        else:
+            room = Room.objects.get(name=room_name)
+            room.rank = room_rank
+
         try:
             room.save()
         except:
-            room_errors.append(room_name + ": Unknown Error")
+            room_errors.append(room_name + ": Save error")
 
     return room_errors

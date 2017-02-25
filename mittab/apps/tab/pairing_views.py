@@ -630,10 +630,6 @@ def start_new_tourny(request):
         TabSettings.objects.create(key="nov_teams_to_break", value=4)
         TabSettings.objects.create(key="lenient_late", value=0)  # why didn't someone add this earlier?
 
-        # customisation for justification bars
-        EBallotSettings.objects.create(key="justify_top", value=26.5)
-        EBallotSettings.objects.create(key="justify_bottom", value=23.5)
-
     except Exception as e:
         return render_to_response('error.html',
                                   {'error_type': "Could not Start Tournament",

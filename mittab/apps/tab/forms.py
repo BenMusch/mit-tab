@@ -4,6 +4,7 @@ from decimal import Decimal
 
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.utils.safestring import mark_safe
 
 from models import *
 
@@ -13,9 +14,16 @@ class UploadBackupForm(forms.Form):
 
 
 class UploadDataForm(forms.Form):
-    team_file = forms.FileField(label="Teams Data File", required=False)
-    judge_file = forms.FileField(label="Judge Data File", required=False)
-    room_file = forms.FileField(label="Room Data File", required=False)
+    team_file = forms.FileField(label=mark_safe('Teams Data File <br /><small>(Name, School, Seed [full, half, free, '
+                                                'none], D1 name, D1 status [varsity, novice, nov, n], D1 phone, '
+                                                'D1 prov, <br />D2 name, D2 [varsity, novice, nov, n], D2 phone, '
+                                                'D2 prov) <b>Note: Overwrites data for duplicate teams</b></small>'),
+                                required=False)
+    judge_file = forms.FileField(label=mark_safe('Judge Data File <br /><small>(name, rank, phone #, provider, '
+                                                 'school) <b>Note: Overwrites data for duplicate judges</b></small>'),
+                                 required=False)
+    room_file = forms.FileField(label=mark_safe('Room Data File <br /><small>(name, rank) <b>Note: Overwrites data for '
+                                                'duplicate rooms</b></small>'), required=False)
 
 
 class SchoolForm(forms.ModelForm):
@@ -73,8 +81,7 @@ class JudgeForm(forms.ModelForm):
 
 class TeamForm(forms.ModelForm):
     debaters = forms.ModelMultipleChoiceField(queryset=Debater.objects.all(),
-                                              widget=FilteredSelectMultiple("Debaters",
-                                                                            is_stacked=False))
+                                              widget=FilteredSelectMultiple("Debaters", is_stacked=False))
 
     #    def __init__(self, *args, **kwargs):
     #        super(TeamForm, self).__init__(*args, **kwargs)

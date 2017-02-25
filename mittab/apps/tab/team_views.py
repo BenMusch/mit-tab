@@ -247,12 +247,11 @@ def view_scratches(request, team_id):
 @permission_required('tab.tab_settings.can_change', login_url="/403/")
 def all_tab_cards(request):
     """
-    Displays all the tab cards. And yes, I will editorialise that all tournaments should release tab cards on the ADPA
-    forum to the public. However, it is something which should clearly be limited in the tab settings for sure.
+    Displays all the tab cards.
     """
     all_teams = Team.objects.all()
     return render_to_response('all_tab_cards.html',
-                              all_teams,
+                              locals(),
                               context_instance=RequestContext(request))
 
 

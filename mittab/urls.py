@@ -7,10 +7,12 @@ import apps.tab.judge_views as judge_views
 import apps.tab.pairing_views as pairing_views
 import apps.tab.team_views as team_views
 import apps.tab.views as views
+from mittab.libs.data import export_xlsx_files
 
 admin.autodiscover()
 
 urlpatterns = patterns('',
+
     # Example:
     # url(r'^tab/', include('tab.foo.urls')),
 
@@ -108,5 +110,10 @@ urlpatterns = patterns('',
     url(r'^upload_backup/$', pairing_views.upload_backup),
 
     # Data Upload
-    url(r'^import_data/$', views.upload_data)
+    url(r'^import_data/$', views.upload_data),
+
+    # Data export
+    url(r'^export/teams', export_xlsx_files.export_teams),
+    url(r'^export/judges', export_xlsx_files.export_judges),
+    url(r'^export/rooms', export_xlsx_files.export_rooms),
 )
