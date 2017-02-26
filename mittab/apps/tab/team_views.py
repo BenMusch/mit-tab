@@ -250,9 +250,7 @@ def all_tab_cards(request):
     Displays all the tab cards.
     """
     all_teams = Team.objects.all()
-    return render_to_response('all_tab_cards.html',
-                              locals(),
-                              context_instance=RequestContext(request))
+    return render_to_response('all_tab_cards.html', locals(), context_instance=RequestContext(request))
 
 
 def pretty_tab_card(request, team_id):

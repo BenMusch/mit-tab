@@ -629,7 +629,8 @@ def confirm_start_new_tourny(request):
     Should be self-evident in the name 'confirm_start_new_tourny'.
     """
     return render_to_response('confirm.html',
-                              {'link': "/pairing/start_tourny/",
+                              {'title': 'Confirm New Tournament',
+                               'link': "/pairing/start_tourny/",
                                'confirm_text': "Create New Tournament"},
                               context_instance=RequestContext(request))
 
@@ -647,15 +648,15 @@ def start_new_tourny(request):
         TabSettings.objects.create(key="tot_rounds", value=5)
         TabSettings.objects.create(key="var_teams_to_break", value=8)
         TabSettings.objects.create(key="nov_teams_to_break", value=4)
-        TabSettings.objects.create(key="lenient_late", value=0)  # why didn't someone add this earlier?
+        TabSettings.objects.create(key="lenient_late", value=0)
 
     except Exception as e:
         return render_to_response('error.html',
                                   {'error_type': "Could not Start Tournament",
                                    'error_name': "",
                                    'error_info': "Invalid Tournament State. "
-                                                 "Time to hand tab. You have my condolences. [%s]" % (
-                                                     e)},
+                                                 "Time to hand tab. [ http://www.csun.edu/~dgw61315/handtab.html ] "
+                                                 "You have my condolences. [%s]" % e},
                                   context_instance=RequestContext(request))
 
     return render_to_response('thanks.html',

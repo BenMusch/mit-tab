@@ -17,6 +17,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+import collections
 from types import IntType
 
 import xlrd
@@ -49,7 +50,21 @@ def import_teams(fileToImport):
             team_errors.append('ERROR: Insufficient Columns in Sheet. No Data Read')
             return team_errors
 
-    school_map = {}
+    # verify no duplicate debaters, give error messages
+    deb_indicies = []
+    for i in range(1, num_teams):
+        deb_indicies.append((sh.cell(i, 3).value.strip(), i))  # tuple saves debater name and row
+        deb_indicies.append((sh.cell(i, 7).value.strip(), i))
+    deb_names = [i[0] for i in deb_indicies]
+    names_dict = collections.Counter(deb_names)
+    for deb_index in deb_indicies:
+        if names_dict.get(deb_index[0]) > 1:  # if dict says appears more than once
+            # inform that duplicate exists at location, report relevant information
+            row_num = deb_index[1]
+            msg = "Check for duplicate debater " + deb_index[0] + " in team " + sh.cell(row_num, 0).value + \
+                  ", on XLS file row " + str(row_num)
+            team_errors.append(msg)
+
     for i in range(1, num_teams):
 
         # Name, School, Seed [full, half, free, none], D1 name, D1 v/n?, D1 phone, D1 prov,
@@ -124,7 +139,7 @@ def import_teams(fileToImport):
             team.school = team_school
             team.seed = team_seed
 
-            team.debaters.clear
+            team.debaters.clear()
             team.debaters.add(deb1)
             if not iron_man:
                 team.debaters.add(deb2)
@@ -145,8 +160,9 @@ def create_status(status):
 
 def create_seed(team_name, seed):
     """Translates the string version of the seed into the pseudo-enum
+    :type team_name: str
     :type seed: str
-    :return tuple with the integer version and whether that team's seed was changed
+    :return tuple with the integer version of the seed and whether that team's seed was changed
     """
     seed_int = 0
     seed_changed = False
@@ -158,15 +174,18 @@ def create_seed(team_name, seed):
     elif seed == 'free seed' or seed == 'free':
         seed_int = 1
 
-        has_free_seed = False
+        multiple_free_seeds = False
         try:
-            for team in Team.objects.get(school=Team.objects.get(name=team_name).school).all():
-                if team.seed == 1:
-                    has_free_seed = True
+            school_name = Team.objects.get(name=team_name).school
+            for team in Team.objects.filter(school=school_name).all():
+                if int(team.seed) == 1:  # 1 is the free seed
+                    if team.name != team_name:
+                        multiple_free_seeds = True
+
         except ObjectDoesNotExist:
             pass
 
-        if has_free_seed:  # force free, note this
+        if multiple_free_seeds:  # force free, note this
             seed_changed = True
             seed_int = 0
 

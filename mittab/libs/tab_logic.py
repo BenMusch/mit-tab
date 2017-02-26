@@ -549,13 +549,13 @@ Miscallaneous team methods:
 """
 
 
-def opp_strength(t):
+def opp_strength(team):
     opp_record = 0
-    myGovRounds = Round.objects.filter(gov_team=t)
-    myOppRounds = Round.objects.filter(opp_team=t)
-    for r in myGovRounds:
+    my_gov_rounds = Round.objects.filter(gov_team=team)
+    my_opp_rounds = Round.objects.filter(opp_team=team)
+    for r in my_gov_rounds:
         opp_record += tot_wins(r.opp_team)
-    for r in myOppRounds:
+    for r in my_opp_rounds:
         opp_record += tot_wins(r.gov_team)
     return opp_record
 
@@ -574,7 +574,7 @@ def tab_var_break():
     teams = rank_teams()
     the_break = teams[0:TabSettings.objects.get(key="var_teams_to_break").value]
     pairings = []
-    for i in range(len(the_break)):
+    for i in xrange(len(the_break)):
         pairings += [(the_break[i], the_break[len(the_break) - i - 1])]
     return pairings
 
@@ -588,7 +588,7 @@ def tab_nov_break():
     return pairings
 
 
-# TODO (Kevin) create documentation for this one, vague notion of team comparison, not entirely sure though
+# FIXME (Kevin) create documentation for this one, vague notion of team comparison, not entirely sure though
 def team_comp(pairing, round_number):
     gov = pairing.gov_team
     opp = pairing.opp_team
@@ -604,7 +604,8 @@ def team_comp(pairing, round_number):
 
 
 def team_score(team):
-    """A tuple representing the passed team's performance at the tournament"""
+    """A tuple representing the passed team's performance at the tournament. Note that this method uses negative speaks
+    and opp-strength because Python sorts from small to large."""
     score = (0, 0, 0, 0, 0, 0, 0, 0)
     try:
         score = (-tot_wins(team),
@@ -774,8 +775,8 @@ def double_adjusted_speaks_deb(debater):
     """
     Double-adjusted speaks are the speaking score of a debater, removing the top two and the bottom two. In tournaments
     where there are five in-rounds, this is the speaker's median score. The algorithm used is to get all the debater's
-    speaks, sort them from top to bottom, and then return the ones in the middle (which is generalised, as needed, since
-    Nats uses 6 in-rounds).
+    speaks, sort them from top to bottom, and then return the ones in the middle (which is general, as needed, since
+    tournaments like Nationals use 6 in-rounds).
     :return: the double-adjusted speaks for the provided debater
     """
     debater_speaks = speaks_for_debater(debater)

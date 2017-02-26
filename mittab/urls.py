@@ -9,7 +9,7 @@ import apps.tab.pairing_views as pairing_views
 import apps.tab.team_views as team_views
 import apps.tab.views as views
 from mittab.apps.tab import template_views
-from mittab.libs.data import export_xlsx_files
+from mittab.libs.data import export_xls_files
 
 admin.autodiscover()
 
@@ -71,7 +71,7 @@ urlpatterns = patterns('',
     url(r'^team/ranking/$', team_views.rank_teams_ajax),
     url(r'^team/rank/$', team_views.rank_teams),
 
-    # Debater related
+                       # Debater related
     url(r'^debater/(\d+)/$', debater_views.view_debater),
     url(r'^debater/(\d+)/delete/$', debater_views.delete_debater),
     url(r'^view_debaters/$', debater_views.view_debaters),
@@ -79,7 +79,7 @@ urlpatterns = patterns('',
     url(r'^debater/ranking/$', debater_views.rank_debaters_ajax),
     url(r'^debater/rank/$', debater_views.rank_debaters),
 
-    # Pairing related
+                       # Pairing related
     url(r'^pairings/status/$', pairing_views.view_status),
     url(r'^pairings/view_rounds/$', pairing_views.view_rounds),
     url(r'^round/(\d+)/$', pairing_views.view_round),
@@ -104,19 +104,22 @@ urlpatterns = patterns('',
     url(r'^e_ballots/$', pairing_views.e_ballots),
     url(r'e_ballots/(\S+)/$', pairing_views.enter_e_ballot),
 
-    # Backups
+                       # Backups
     url(r'^backup/restore/(.+)/$', pairing_views.restore_backup),
     url(r'^backup/download/(.+)/$', pairing_views.download_backup),
     url(r'^backup/(.+)/$', pairing_views.view_backup),
     url(r'^upload_backup/$', pairing_views.upload_backup),
 
-    # Data Upload
+                       # Data Upload
     url(r'^import_data/$', views.upload_data),
 
-    # Data export
+                       # Data export
     url(r'^export/$', template_views.ExportXlsView.as_view()),
-    url(r'^export/teams', export_xlsx_files.export_teams),
-    url(r'^export/judges', export_xlsx_files.export_judges),
-    url(r'^export/rooms', export_xlsx_files.export_rooms),
+    url(r'^export/teams', export_xls_files.export_teams),
+    url(r'^export/judges', export_xls_files.export_judges),
+    url(r'^export/rooms', export_xls_files.export_rooms),
+    url(r'^export/team-stats', export_xls_files.export_team_stats),
+    url(r'^export/speaker-stats', export_xls_files.export_debater_stats),
+
 
 )

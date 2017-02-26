@@ -2,7 +2,7 @@
 
 import random
 
-from mittab.apps.tab.models import Round, RoundStats, Judge, CheckIn, Room
+from mittab.apps.tab.models import Round, RoundStats, Judge, CheckIn, Room, TabSettings
 
 # Speaks every quarter point
 speak_range = [23 + .25 * i for i in range(17)]
@@ -103,11 +103,13 @@ def generate_result_for_round(round_obj, prob_forfeit=0.0, prob_ironman=0.0):
 
     # Generate RoundStats, shuffle for role randomization
     random.shuffle(all_points)
-    gov_roles, opp_roles = ['pm', 'mg'], ['lo', 'mo']
+    gov_roles = ['pm', 'mg']
+    opp_roles = ['lo', 'mo']
     round_stats = []
     for debater, points in all_points:
         role = ''
         if debater in gov_debaters:
+
             role = gov_roles.pop()
         else:
             role = opp_roles.pop()

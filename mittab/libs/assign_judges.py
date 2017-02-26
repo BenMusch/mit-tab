@@ -94,7 +94,7 @@ def add_judges(pairings, judges, panel_points):
             for judge in pairing.judges.all():
                 judges.remove(judge)
 
-        # FIXME: (Kevin) Ought panels, as they generally are consensus (or non-voting wings) pair bad wins with good chairs?
+        # FIXME: (Kevin) Ought panels, as they generally are consensus (or non-voting wings) pair bad judges with good chairs?
         # Function that tries to panel num_to_panel rounds of the potential_pairings
         # Has built in logic to retry with lower number of panels if we fail due
         # to either scratches or wanting to many rounds
@@ -196,7 +196,7 @@ def calc_weight_panel(judges):
     judge_ranks = [float(j.rank) for j in judges]
     avg = round(float(sum(judge_ranks)) / len(judge_ranks))
     sum_squares = sum([((r - avg) ** 2) for r in judge_ranks])
-    # Use the sum_squares so we get highest panelists with lowest judges 
+    # Use the sum_squares so we get highest panelists with lowest judges
     return 1000000 * sum(judge_ranks) + sum_squares
 
 
