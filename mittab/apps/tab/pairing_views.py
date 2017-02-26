@@ -1,4 +1,5 @@
 import datetime
+import pprint
 import sys
 import time
 import traceback
@@ -91,24 +92,32 @@ def pair_round(request):
     cache_logic.clear_cache()
     current_round = TabSettings.objects.get(key="cur_round")
     current_round_number = current_round.value
-    if request.method == 'POST':
-        # We should pair the round
+
+    if request.method == 'POST':  # We should pair the round
+
         try:
             TabSettings.set('pairing_released', 0)
-            backup.backup_round("round_%i_before_pairing.db" % (current_round_number))
+            backup.backup_round("round_%i_before_pairing.db" % current_round_number)
+
             with transaction.atomic():
                 tab_logic.pair_round()
-                current_round.value = current_round.value + 1
+                current_round.value += 1
                 current_round.save()
+
             backup.backup_round("round_%i_after_pairing.db" % current_round_number)
+
         except Exception as exp:
             traceback.print_exc(file=sys.stdout)
             return render_to_response('error.html',
-                                      {'error_type': "Pair Next Round",
-                                       'error_name': "Pairing Round %s" % (current_round.value + 1),
-                                       'error_info': "Could not pair next round because of: [{0}]".format(exp)},
+                                      {'error_type': "Pair next round",
+                                       'error_name': 'Error in round (TabSettings) ' +
+                                                     str(TabSettings.objects.get(key="cur_round").value) +
+                                                     ', (local) ' + str(current_round_number),
+                                       'error_info': traceback.format_exc()},
                                       context_instance=RequestContext(request))
+
         return view_status(request)
+
     else:
         # See if we can pair the round
         title = "Pairing Round %s" % (current_round_number)
@@ -141,10 +150,12 @@ def pair_round(request):
             ready_to_pair = "No"
             ready_to_pair_alt = str(e)
             check_status.append((msg, "No", "Not all rounds are entered. %s" % str(e)))
+
         except ByeAssignmentError as e:
             ready_to_pair = "No"
             ready_to_pair_alt = str(e)
             check_status.append((msg, "No", "You have a bye and results. %s" % str(e)))
+
         except NoShowAssignmentError as e:
             ready_to_pair = "No"
             ready_to_pair_alt = str(e)
@@ -159,14 +170,18 @@ def pair_round(request):
 def assign_judges_to_pairing(request):
     current_round_number = TabSettings.objects.get(key="cur_round").value - 1
     if request.method == 'POST':
+
         print "Assigning judges"
         print request.POST
-        panel_points, errors = [], []
+
+        panel_points = []
+        errors = []
+
         potential_panel_points = [k for k in request.POST.keys() if k.startswith('panel_')]
         for point in potential_panel_points:
             try:
                 point = int(point.split("_")[1])
-                num = float(request.POST["panel_{0}".format(point)])
+                num = float(request.POST["panel_{0}".format(point)])  # comes from 'Panel Gap'; what does that mean?
                 if num > 0.0:
                     panel_points.append((Round.objects.get(id=point), num))
             except Exception as e:
@@ -176,7 +191,10 @@ def assign_judges_to_pairing(request):
         panel_points.reverse()
         rounds = list(Round.objects.filter(round_number=current_round_number))
         judges = [ci.judge for ci in CheckIn.objects.filter(round_number=current_round_number)]
+
         try:
+            pprint.pprint('assign_judges_to_pairing.panel_points: ' + str(panel_points))
+            pprint.pprint('assign_judges_to_pairing.errors: ' + str(errors))
             assign_judges.add_judges(rounds, judges, panel_points)
         except Exception as e:
             return render_to_response('error.html',
@@ -184,6 +202,7 @@ def assign_judges_to_pairing(request):
                                        'error_name': "",
                                        'error_info': str(e)},
                                       context_instance=RequestContext(request))
+
         return view_round(request, current_round_number)
     else:
         return view_round(request, current_round_number)

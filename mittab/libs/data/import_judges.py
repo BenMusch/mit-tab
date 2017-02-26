@@ -106,7 +106,7 @@ def import_judges(fileToImport):
                 break
             cur_col += 1
 
-        if is_duplicate:    # overwrite the data for that judge
+        if is_duplicate:  # overwrite the data for that judge
             judge = Judge.objects.get(name=judge_name)
             judge.rank = judge_rank
             judge.phone = judge_phone

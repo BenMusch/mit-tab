@@ -55,8 +55,8 @@ Includes views for viewing schools, viewing one school, entering a school, and d
 
 def view_schools(request):
     """
-    Gets a list of (id, school_name) tuples. This is returned when you click the button to view the schols list from
-    the front page. I am unsure of its utility given that this is already done on the front page.
+    Gets a list of (id, school_name) tuples. This is returned when you click the button to view the schools list from
+    the front page.
     """
     c_schools = [(s.pk, s.name) for s in School.objects.all().order_by("name")]
     return render_to_response('list_data.html',

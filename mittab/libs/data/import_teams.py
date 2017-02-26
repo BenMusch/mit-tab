@@ -20,6 +20,7 @@
 from types import IntType
 
 import xlrd
+from django.core.exceptions import ObjectDoesNotExist
 
 from mittab.apps.tab.forms import SchoolForm
 from mittab.apps.tab.models import *
@@ -158,9 +159,12 @@ def create_seed(team_name, seed):
         seed_int = 1
 
         has_free_seed = False
-        for team in Team.objects.get(name=team_name).school.team_set.all():
-            if team.seed == 1:
-                has_free_seed = True
+        try:
+            for team in Team.objects.get(school=Team.objects.get(name=team_name).school).all():
+                if team.seed == 1:
+                    has_free_seed = True
+        except ObjectDoesNotExist:
+            pass
 
         if has_free_seed:  # force free, note this
             seed_changed = True

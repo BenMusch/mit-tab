@@ -39,12 +39,13 @@ def add_judges(pairings, judges, panel_points):
     random.seed(1337)
     random.shuffle(judges)
 
+    # FIXME: (Kevin) Why do this rather than some algorithm which assigns the best judges to bubble rounds?
     # Order the judges and pairings by power ranking (high speaking teams get high ranked judges)
     judges = sorted(judges, key=lambda j: j.rank, reverse=True)
     pairings.sort(key=lambda x: tab_logic.team_comp(x, current_round_number),
                   reverse=True)
 
-    pprint.pprint(pairings)
+    pprint.pprint('pairings: ' + str(pairings))
 
     pairing_groups = [list() for panel_point in panel_points] + [list()]
     panel_gaps = {}
@@ -55,7 +56,7 @@ def add_judges(pairings, judges, panel_points):
             panel_gaps[current_group] = panel_points[current_group][1]
             current_group += 1
 
-    pprint.pprint(panel_points)
+    pprint.pprint('panel_points: ' + str(panel_points))
 
     for (group_i, group) in enumerate(pairing_groups):
         num_rounds = len(group)
@@ -93,8 +94,7 @@ def add_judges(pairings, judges, panel_points):
             for judge in pairing.judges.all():
                 judges.remove(judge)
 
-        # TODO probably make a better algorithm to assign panels automatically, also
-        # TODO probably make a function to turn panel judges into one judge for pairing purposes
+        # FIXME: (Kevin) Ought panels, as they generally are consensus (or non-voting wings) pair bad wins with good chairs?
         # Function that tries to panel num_to_panel rounds of the potential_pairings
         # Has built in logic to retry with lower number of panels if we fail due
         # to either scratches or wanting to many rounds

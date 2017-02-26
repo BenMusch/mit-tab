@@ -29,15 +29,15 @@ def backup_round(dst_filename=None, round_number=None, btime=None):
     :param btime: time to save as
     :return:
     """
-    if round_number is None:    # current round number
+    if round_number is None:  # current round number
         round_number = TabSettings.objects.get(key="cur_round").value
 
-    if btime is None:   # current time
+    if btime is None:  # current time
         btime = int(time.time())
 
     print "Attempting to backup to backups directory"
 
-    prefix = get_backup_prefix()    # save with prefix
+    prefix = get_backup_prefix()  # save with prefix
     if dst_filename == None:
         dst_filename = prefix + "/backups/site_round_%i_%i.db" % (round_number, btime)
     else:

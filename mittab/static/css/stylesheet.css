@@ -210,13 +210,15 @@ ul#teams {
     color: #CC0000;
 }
 
-.success {
-    color: #009900;
+p.warning {
+    border: 1px solid #CC0000;
+    padding: 5px 5px 5px 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
-p.warning {
-    border: 1px solid #444444;
-    padding: .5em;
+.success {
+    color: #009900;
 }
 
 th.header {
@@ -246,13 +248,15 @@ table.pretty {
     text-align: left;
     border-collapse: collapse;
     border: 1px solid #666666;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 table.pretty th {
     border: 1px solid #666666;
     padding: .25em;
     font-size: 18px;
-    font-style: bold;
+    font-weight: bold;
 }
 
 div#round_info {
@@ -267,11 +271,13 @@ table.check_status {
 
 table.check_status th {
     border: 1px solid #BBBBBB;
+    padding: 5px;
 }
 
 table.check_status td {
     border-right: 1px solid #BBBBBB;
     border-left: 1px solid #BBBBBB;
+    padding: 5px;
 }
 
 div.obj_info {
@@ -503,5 +509,7 @@ div.spacer {
     width: 40px;
 }
 
-
-
+.export_links {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}

@@ -1,12 +1,14 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from django.contrib.auth.views import logout
+from django.views.generic import TemplateView
 
 import apps.tab.debater_views as debater_views
 import apps.tab.judge_views as judge_views
 import apps.tab.pairing_views as pairing_views
 import apps.tab.team_views as team_views
 import apps.tab.views as views
+from mittab.apps.tab import template_views
 from mittab.libs.data import export_xlsx_files
 
 admin.autodiscover()
@@ -26,7 +28,7 @@ urlpatterns = patterns('',
     url(r'^403/', views.render_403),
 
     # Account related
-    url(r'^accounts/login/$',  views.tab_login),
+    url(r'^accounts/login/$', views.tab_login),
     url(r'^accounts/logout/$', logout),
 
     # Judge related
@@ -102,7 +104,6 @@ urlpatterns = patterns('',
     url(r'^e_ballots/$', pairing_views.e_ballots),
     url(r'e_ballots/(\S+)/$', pairing_views.enter_e_ballot),
 
-
     # Backups
     url(r'^backup/restore/(.+)/$', pairing_views.restore_backup),
     url(r'^backup/download/(.+)/$', pairing_views.download_backup),
@@ -113,7 +114,9 @@ urlpatterns = patterns('',
     url(r'^import_data/$', views.upload_data),
 
     # Data export
+    url(r'^export/$', template_views.ExportXlsView.as_view()),
     url(r'^export/teams', export_xlsx_files.export_teams),
     url(r'^export/judges', export_xlsx_files.export_judges),
     url(r'^export/rooms', export_xlsx_files.export_rooms),
+
 )
