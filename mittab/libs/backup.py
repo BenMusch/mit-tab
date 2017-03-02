@@ -10,20 +10,34 @@ from mittab.settings import BASE_DIR
 
 
 def get_backup_prefix():
+    """
+    Creates prefix for saving backups
+    :return: the MIT-TAB directory
+    """
     return os.path.join(BASE_DIR, "mittab")
 
 
-def get_backup_path():
+def get_backup_path():  # I'm not entirely sure whether this is actually used
     return os.path.join(get_backup_prefix(), "backups")
 
 
 def backup_round(dst_filename=None, round_number=None, btime=None):
-    if round_number is None:
+    """
+    Saves a backup
+    :param dst_filename: destination filename
+    :param round_number: round number to save as
+    :param btime: time to save as
+    :return:
+    """
+    if round_number is None:  # current round number
         round_number = TabSettings.objects.get(key="cur_round").value
-    if btime is None:
+
+    if btime is None:  # current time
         btime = int(time.time())
+
     print "Attempting to backup to backups directory"
-    prefix = get_backup_prefix()
+
+    prefix = get_backup_prefix()  # save with prefix
     if dst_filename == None:
         dst_filename = prefix + "/backups/site_round_%i_%i.db" % (round_number, btime)
     else:

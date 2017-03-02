@@ -13,6 +13,7 @@ from mittab.apps.tab.models import *
 Pairing methods
 """
 
+
 def pair_round():
     """
     Pair the next round of debate.
@@ -211,9 +212,10 @@ def pair_round():
         pairings = sorted(pairings, key=lambda team: min(sorted_teams.index(team[0]), sorted_teams.index(team[1])))
 
     # Assign rooms (does this need to be random? maybe bad to have top ranked teams/judges in top rooms?)
+    # TODO: Is it not possible to create a TabSetting which can basically make it optional?
+    # Note that if you know this, you can basically back-tab based on room rank inferences
     rooms = Room.objects.all()
     rooms = sorted(rooms, key=lambda r: r.rank, reverse=True)
-
     for i in range(len(pairings)):
         pairings[i][3] = rooms[i]
 
@@ -238,7 +240,6 @@ def pair_round():
 
 
 def have_enough_judges(round_to_check):
-    last_round = round_to_check - 1
     future_rounds = Team.objects.filter(checked_in=True).count() / 2
     num_judges = CheckIn.objects.filter(round_number=round_to_check).count()
     if num_judges < future_rounds:
@@ -320,6 +321,7 @@ def add_scratches_for_school_affil():
 
 # This method is tested by testsUnitTests.all_highest_seed()
 def highest_seed(team1, team2):
+    """Finds the higher seeded team, and returns that seed."""
     if team1.seed > team2.seed:
         return team1.seed
     else:
@@ -327,6 +329,7 @@ def highest_seed(team1, team2):
 
 
 def highest_speak(t1, t2):
+    """Finds the higher speaking team, and returns their speaks."""
     if tot_speaks(t1) > tot_speaks(t2):
         return tot_speaks(t1)
     else:
@@ -334,6 +337,7 @@ def highest_speak(t1, t2):
 
 
 def most_wins(t1, t2):
+    """Finds the team with more wins and returns that team's number of wins."""
     if tot_wins(t1) > tot_wins(t2):
         return tot_wins(t1)
     else:
@@ -361,8 +365,7 @@ def hit_pull_up(t):
     return False
 
 
-# This should count the number of pullup rounds the team has faced (should be 1)
-# at most
+# This should count the number of pullup rounds the team has faced (should be 1) at most
 def hit_pull_up_count(t):
     pullups = 0
     for a in list(Round.objects.filter(gov_team=t)):
@@ -374,8 +377,7 @@ def hit_pull_up_count(t):
     return pullups
 
 
-# This should count the number of pullup rounds the team has had (should be 1)
-# at most
+# This should count the number of pullup rounds the team has had (should be 1) at most
 def pull_up_count(t):
     pullups = 0
     for a in list(Round.objects.filter(gov_team=t)):
@@ -408,11 +410,16 @@ def num_byes(t):
 
 
 def num_forfeit_wins(team):
+    """Returns a team's number of forfeit wins.
+
+    A team can win by forfeit either by having XXX_VIA_FORFEIT
+    or by having ALL_WIN situations. """
     forfeit_wins = Round.objects.filter(
         Q(gov_team=team, victor=Round.GOV_VIA_FORFEIT) |
         Q(opp_team=team, victor=Round.OPP_VIA_FORFEIT) |
         Q(gov_team=team, victor=Round.ALL_WIN) |
         Q(opp_team=team, victor=Round.ALL_WIN)).count()
+    # TODO (Kevin) why is Round.ALL_WIN here two times?
     return forfeit_wins
 
 
@@ -432,7 +439,7 @@ def forfeited_round(r, t):
         return False
 
 
-###Return true if the team won the round because the other team forfeited, otherwise return false
+# Return true if the team won the round because the other team forfeited, otherwise return false
 def won_by_forfeit(r, t):
     if Round.objects.filter(gov_team=t, round_number=r.round_number).count() > 0:
         if r.victor == Round.GOV_VIA_FORFEIT or r.victor == Round.ALL_WIN:
@@ -452,8 +459,7 @@ def team_wins_by_forfeit():
     or by having ALL_WIN situations.
 
     Returns:
-        wins_by_forfeit - A list of *teams* for each time they 
-        have won by forfeit, there very well may be duplicates.
+        wins_by_forfeit - A list of *teams* for each time they have won by forfeit, there may be duplicates.
     """
     wins_by_forfeit = []
     for r in Round.objects.filter(victor=Round.GOV_VIA_FORFEIT):
@@ -474,14 +480,14 @@ def team_wins_by_forfeit():
 
 # Calculate the total number of wins a team has
 def tot_wins(team):
-    tot_wins = Round.objects.filter(
+    wins = Round.objects.filter(
         Q(gov_team=team, victor=Round.GOV) |
         Q(opp_team=team, victor=Round.OPP)).count()
     # If a team had the bye, they won't have a round for that win so add one win
-    tot_wins += num_byes(team)
+    wins += num_byes(team)
     # If a team has won by forfeit, we didn't count that yet
-    tot_wins += num_forfeit_wins(team)
-    return tot_wins
+    wins += num_forfeit_wins(team)
+    return wins
 
 
 # End pairing methods
@@ -492,8 +498,7 @@ Team speaks methods
 
 # @cache()
 def tot_speaks(team):
-    total_speaks = sum([tot_speaks_deb(deb, False)
-                        for deb in team.debaters.all()])
+    total_speaks = sum([tot_speaks_deb(deb, False) for deb in team.debaters.all()])
     return total_speaks
 
 
@@ -536,19 +541,21 @@ def double_adjusted_ranks(team):
     ranks = sorted([item for sublist in ranks for item in sublist])
     return sum(ranks[2:-2])
 
+
 """
 Miscallaneous team methods:
     Stuff like Opp-strength, listings for teams, default methods for varsity and novice breaks (based entire on speaks)
     so if you don't use that tab-policy, do not use those functions.
 """
 
-def opp_strength(t):
+
+def opp_strength(team):
     opp_record = 0
-    myGovRounds = Round.objects.filter(gov_team=t)
-    myOppRounds = Round.objects.filter(opp_team=t)
-    for r in myGovRounds:
+    my_gov_rounds = Round.objects.filter(gov_team=team)
+    my_opp_rounds = Round.objects.filter(opp_team=team)
+    for r in my_gov_rounds:
         opp_record += tot_wins(r.opp_team)
-    for r in myOppRounds:
+    for r in my_opp_rounds:
         opp_record += tot_wins(r.gov_team)
     return opp_record
 
@@ -567,7 +574,7 @@ def tab_var_break():
     teams = rank_teams()
     the_break = teams[0:TabSettings.objects.get(key="var_teams_to_break").value]
     pairings = []
-    for i in range(len(the_break)):
+    for i in xrange(len(the_break)):
         pairings += [(the_break[i], the_break[len(the_break) - i - 1])]
     return pairings
 
@@ -581,8 +588,10 @@ def tab_nov_break():
     return pairings
 
 
+# FIXME (Kevin) create documentation for this one, vague notion of team comparison, not entirely sure though
 def team_comp(pairing, round_number):
-    gov, opp = pairing.gov_team, pairing.opp_team
+    gov = pairing.gov_team
+    opp = pairing.opp_team
     if round_number == 1:
         print "Using seeds"
         return (max(gov.seed, opp.seed),
@@ -595,7 +604,8 @@ def team_comp(pairing, round_number):
 
 
 def team_score(team):
-    """A tuple representing the passed team's performance at the tournament"""
+    """A tuple representing the passed team's performance at the tournament. Note that this method uses negative speaks
+    and opp-strength because Python sorts from small to large."""
     score = (0, 0, 0, 0, 0, 0, 0, 0)
     try:
         score = (-tot_wins(team),
@@ -625,6 +635,7 @@ def rank_teams_except_record(teams):
 
 def rank_nov_teams():
     return sorted(all_nov_teams(), key=team_score)
+
 
 """
 Debater speaks calculation methods
@@ -764,8 +775,8 @@ def double_adjusted_speaks_deb(debater):
     """
     Double-adjusted speaks are the speaking score of a debater, removing the top two and the bottom two. In tournaments
     where there are five in-rounds, this is the speaker's median score. The algorithm used is to get all the debater's
-    speaks, sort them from top to bottom, and then return the ones in the middle (which is generalised, as needed, since
-    Nats uses 6 in-rounds).
+    speaks, sort them from top to bottom, and then return the ones in the middle (which is general, as needed, since
+    tournaments like Nationals use 6 in-rounds).
     :return: the double-adjusted speaks for the provided debater
     """
     debater_speaks = speaks_for_debater(debater)

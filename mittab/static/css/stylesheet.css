@@ -1,5 +1,5 @@
 body {
-    background: #BFD9FF;
+    background: #f5f5f5;
     padding: auto;
     font-size: 14px;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
@@ -99,12 +99,12 @@ div#container {
     width: 95%;
     text-align: left;
     margin: auto;
+    border-top: solid 5px #ccc;
     color: #333333;
     background-color: #ffffff;
     padding-right: 1em;
     padding-left: 1em;
     padding-top: 1em;
-    border-radius: 1em;
     overflow: auto;
 }
 
@@ -128,7 +128,7 @@ div#top_banner {
     margin-bottom: 0.4em;
     text-align: center;
     position: relative;
-    border-radius: 1em;
+    border-radius: 0.5em;
 }
 
 img.banner {
@@ -159,6 +159,7 @@ div.index_header {
     display: block;
     font-size: 20px;
     color: black;
+    padding: 0.2em;
 }
 
 .w100 {
@@ -209,13 +210,15 @@ ul#teams {
     color: #CC0000;
 }
 
-.success {
-    color: #009900;
+p.warning {
+    border: 1px solid #CC0000;
+    padding: 5px 5px 5px 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
-p.warning {
-    border: 1px solid #444444;
-    padding: .5em;
+.success {
+    color: #009900;
 }
 
 th.header {
@@ -225,7 +228,8 @@ th.header {
 
 div#banner {
     font-size: 25px;
-    padding: .2em;
+    padding-bottom: .4em;
+    padding-top: .4em;
 }
 
 div.mittab-content {
@@ -244,13 +248,15 @@ table.pretty {
     text-align: left;
     border-collapse: collapse;
     border: 1px solid #666666;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 table.pretty th {
     border: 1px solid #666666;
     padding: .25em;
     font-size: 18px;
-    font-style: bold;
+    font-weight: bold;
 }
 
 div#round_info {
@@ -265,18 +271,24 @@ table.check_status {
 
 table.check_status th {
     border: 1px solid #BBBBBB;
+    padding: 5px;
 }
 
 table.check_status td {
     border-right: 1px solid #BBBBBB;
     border-left: 1px solid #BBBBBB;
+    padding: 5px;
 }
 
 div.obj_info {
     border: 1px solid #BBBBBB;
-    padding: .5em;
+    padding: 1em;
     margin-botton: 1em;
     overflow: hidden;
+}
+
+div.obj_info th, td {
+    padding: 0.25em;
 }
 
 .greyed_out {
@@ -320,6 +332,7 @@ div.team_record {
 
 div.team_record table {
     border-collapse: collapse;
+    margin-bottom: 0.25em;
 }
 
 div.team_record table th {
@@ -496,5 +509,7 @@ div.spacer {
     width: 40px;
 }
 
-
-
+.export_links {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}

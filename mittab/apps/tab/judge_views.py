@@ -10,10 +10,12 @@ from models import *
 def view_judges(request):
     # Get a list of (id,school_name) tuples
     current_round = TabSettings.objects.get(key="cur_round").value - 1
-    checkins = CheckIn.objects.filter(round_number=current_round)
-    checkins_next = CheckIn.objects.filter(round_number=(current_round + 1))
-    checked_in_judges = set([c.judge for c in checkins])
-    checked_in_judges_next = set([c.judge for c in checkins_next])
+
+    check_ins = CheckIn.objects.filter(round_number=current_round)
+    check_ins_next = CheckIn.objects.filter(round_number=(current_round + 1))
+
+    checked_in_judges = set([c.judge for c in check_ins])
+    checked_in_judges_next = set([c.judge for c in check_ins_next])
 
     def flags(judge):
         result = 0
@@ -28,7 +30,7 @@ def view_judges(request):
 
         if judge.rank < 3.0:
             result |= TabFlags.LOW_RANKED_JUDGE
-        if judge.rank >= 3.0 and judge.rank < 5.0:
+        if 3.0 <= judge.rank < 5.0:
             result |= TabFlags.MID_RANKED_JUDGE
         if judge.rank >= 5.0:
             result |= TabFlags.HIGH_RANKED_JUDGE
@@ -42,6 +44,7 @@ def view_judges(request):
                   TabFlags.JUDGE_NOT_CHECKED_IN_NEXT],
                  [TabFlags.LOW_RANKED_JUDGE, TabFlags.MID_RANKED_JUDGE, TabFlags.HIGH_RANKED_JUDGE]]
     filters, symbol_text = TabFlags.get_filters_and_symbols(all_flags)
+
     print filters
     return render_to_response('list_data.html',
                               {'item_type': 'judge',
@@ -84,6 +87,7 @@ def view_judge(request, judge_id):
                                        'error_name': "",
                                        'error_info': form.errors},
                                       context_instance=RequestContext(request))
+
     else:
         form = JudgeForm(instance=judge)
         base_url = '/judge/' + str(judge_id) + '/'
@@ -94,7 +98,7 @@ def view_judge(request, judge_id):
         return render_to_response('data_entry.html',
                                   {'form': form,
                                    'links': links,
-                                   'title': "Viewing Judge: %s" % (judge.name)},
+                                   'title': "Viewing Judge: %s" % (judge.name + " (" + judge.ballot_code + ")")},
                                   context_instance=RequestContext(request))
 
 

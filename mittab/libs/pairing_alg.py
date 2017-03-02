@@ -49,7 +49,7 @@ def perfect_pairing(list_of_teams):
             if [list_of_teams[pairings_num.index(pair)], list_of_teams[pair]] not in all_pairs and [list_of_teams[pair],
                                                                                                     list_of_teams[
                                                                                                         pairings_num.index(
-                                                                                                                pair)]] not in all_pairs:
+                                                                                                            pair)]] not in all_pairs:
                 all_pairs += [[list_of_teams[pairings_num.index(pair)], list_of_teams[pair]]]
                 # print "all pairs"
                 # print all_pairs
@@ -129,7 +129,7 @@ def calc_weight(team_a,
 
     # Penalize for team hitting pull-up more than once
     if (tab_logic.hit_pull_up(team_a) and tab_logic.tot_wins(team_b) < tab_logic.tot_wins(team_a)) or (
-        tab_logic.hit_pull_up(team_b) and tab_logic.tot_wins(team_a) < tab_logic.tot_wins(team_b)):
+                tab_logic.hit_pull_up(team_b) and tab_logic.tot_wins(team_a) < tab_logic.tot_wins(team_b)):
         wt += hit_pull_up_before
 
     # Penalize for teams hitting each other before 

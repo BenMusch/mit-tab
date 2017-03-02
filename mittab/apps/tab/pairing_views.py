@@ -1,4 +1,5 @@
 import datetime
+import pprint
 import sys
 import time
 import traceback
@@ -14,10 +15,10 @@ import mittab.libs.assign_judges as assign_judges
 import mittab.libs.backup as backup
 import mittab.libs.cache_logic as cache_logic
 import mittab.libs.tab_logic as tab_logic
-from errors import *
-from forms import ResultEntryForm, UploadBackupForm, score_panel, validate_panel, EBallotForm
+from mittab.apps.tab.errors import *
+from mittab.apps.tab.forms import ResultEntryForm, UploadBackupForm, score_panel, validate_panel, EBallotForm
+from mittab.apps.tab.models import *
 from mittab.libs.errors import *
-from models import *
 
 
 @permission_required('tab.tab_settings.can_change', login_url="/403/")
@@ -91,24 +92,32 @@ def pair_round(request):
     cache_logic.clear_cache()
     current_round = TabSettings.objects.get(key="cur_round")
     current_round_number = current_round.value
-    if request.method == 'POST':
-        # We should pair the round
+
+    if request.method == 'POST':  # We should pair the round
+
         try:
             TabSettings.set('pairing_released', 0)
-            backup.backup_round("round_%i_before_pairing.db" % (current_round_number))
+            backup.backup_round("round_%i_before_pairing.db" % current_round_number)
+
             with transaction.atomic():
                 tab_logic.pair_round()
-                current_round.value = current_round.value + 1
+                current_round.value += 1
                 current_round.save()
+
             backup.backup_round("round_%i_after_pairing.db" % current_round_number)
+
         except Exception as exp:
             traceback.print_exc(file=sys.stdout)
             return render_to_response('error.html',
-                                      {'error_type': "Pair Next Round",
-                                       'error_name': "Pairing Round %s" % (current_round.value + 1),
-                                       'error_info': "Could not pair next round because of: [{0}]".format(exp)},
+                                      {'error_type': "Pair next round",
+                                       'error_name': 'Error in round (TabSettings) ' +
+                                                     str(TabSettings.objects.get(key="cur_round").value) +
+                                                     ', (local) ' + str(current_round_number),
+                                       'error_info': traceback.format_exc()},
                                       context_instance=RequestContext(request))
+
         return view_status(request)
+
     else:
         # See if we can pair the round
         title = "Pairing Round %s" % (current_round_number)
@@ -141,10 +150,12 @@ def pair_round(request):
             ready_to_pair = "No"
             ready_to_pair_alt = str(e)
             check_status.append((msg, "No", "Not all rounds are entered. %s" % str(e)))
+
         except ByeAssignmentError as e:
             ready_to_pair = "No"
             ready_to_pair_alt = str(e)
             check_status.append((msg, "No", "You have a bye and results. %s" % str(e)))
+
         except NoShowAssignmentError as e:
             ready_to_pair = "No"
             ready_to_pair_alt = str(e)
@@ -159,14 +170,18 @@ def pair_round(request):
 def assign_judges_to_pairing(request):
     current_round_number = TabSettings.objects.get(key="cur_round").value - 1
     if request.method == 'POST':
+
         print "Assigning judges"
         print request.POST
-        panel_points, errors = [], []
+
+        panel_points = []
+        errors = []
+
         potential_panel_points = [k for k in request.POST.keys() if k.startswith('panel_')]
         for point in potential_panel_points:
             try:
                 point = int(point.split("_")[1])
-                num = float(request.POST["panel_{0}".format(point)])
+                num = float(request.POST["panel_{0}".format(point)])  # comes from 'Panel Gap'; what does that mean?
                 if num > 0.0:
                     panel_points.append((Round.objects.get(id=point), num))
             except Exception as e:
@@ -176,7 +191,10 @@ def assign_judges_to_pairing(request):
         panel_points.reverse()
         rounds = list(Round.objects.filter(round_number=current_round_number))
         judges = [ci.judge for ci in CheckIn.objects.filter(round_number=current_round_number)]
+
         try:
+            pprint.pprint('assign_judges_to_pairing.panel_points: ' + str(panel_points))
+            pprint.pprint('assign_judges_to_pairing.errors: ' + str(errors))
             assign_judges.add_judges(rounds, judges, panel_points)
         except Exception as e:
             return render_to_response('error.html',
@@ -184,6 +202,7 @@ def assign_judges_to_pairing(request):
                                        'error_name': "",
                                        'error_info': str(e)},
                                       context_instance=RequestContext(request))
+
         return view_round(request, current_round_number)
     else:
         return view_round(request, current_round_number)
@@ -325,7 +344,7 @@ def view_round(request, round_number, errors=None):
 
 def alternative_judges(request, round_id, judge_id=None):
     round_obj = Round.objects.get(id=int(round_id))
-    round_number = round_obj.round_number
+    round_num = round_obj.round_number
     round_gov, round_opp = round_obj.gov_team, round_obj.opp_team
     # All of these variables are for the convenience of the template
     try:
@@ -336,16 +355,18 @@ def alternative_judges(request, round_id, judge_id=None):
     except TypeError:
         current_judge_id, current_judge_obj, current_judge_rank = "", "", ""
         current_judge_name = "No judge"
-    excluded_judges = Judge.objects.exclude(judges__round_number=round_number) \
-        .filter(checkin__round_number=round_number)
-    included_judges = Judge.objects.filter(judges__round_number=round_number) \
-        .filter(checkin__round_number=round_number)
+
+    # get the judges who are currently paired in (excluded_judges) and not (included_judges)
+    excluded_judges = Judge.objects.exclude(judges__round_number=round_num).filter(checkin__round_number=round_num)
+    included_judges = Judge.objects.filter(judges__round_number=round_num).filter(checkin__round_number=round_num)
+
     excluded_judges = [(j.name, j.id, float(j.rank))
                        for j in
                        assign_judges.can_judge_teams(excluded_judges, round_gov, round_opp)]
     included_judges = [(j.name, j.id, float(j.rank))
                        for j in
                        assign_judges.can_judge_teams(included_judges, round_gov, round_opp)]
+
     included_judges = sorted(included_judges, key=lambda x: -x[2])
     excluded_judges = sorted(excluded_judges, key=lambda x: -x[2])
 
@@ -501,6 +522,8 @@ def enter_result(request, round_id, e_ballot=False):
     round_obj = Round.objects.get(id=round_id)
 
     if request.method == 'POST':
+        # TODO implement some way to verify that the submitted e-ballot is the correct one for that round
+        # TODO also implement some way to verify that the correct winner was selected given equal speaks and ranks
         if e_ballot:
             form = EBallotForm(request.POST, round_instance=round_obj)
         else:
@@ -521,7 +544,6 @@ def enter_result(request, round_id, e_ballot=False):
                                       context_instance=RequestContext(request))
 
     else:
-        # TODO implement some way to verify that the submitted e-ballot is the correct one for that round
         # is_current = (round_obj.round_number == TabSettings.objects.get(key="cur_round"))
         if e_ballot:
             form = EBallotForm(round_instance=round_obj)
@@ -607,7 +629,8 @@ def confirm_start_new_tourny(request):
     Should be self-evident in the name 'confirm_start_new_tourny'.
     """
     return render_to_response('confirm.html',
-                              {'link': "/pairing/start_tourny/",
+                              {'title': 'Confirm New Tournament',
+                               'link': "/pairing/start_tourny/",
                                'confirm_text': "Create New Tournament"},
                               context_instance=RequestContext(request))
 
@@ -625,15 +648,15 @@ def start_new_tourny(request):
         TabSettings.objects.create(key="tot_rounds", value=5)
         TabSettings.objects.create(key="var_teams_to_break", value=8)
         TabSettings.objects.create(key="nov_teams_to_break", value=4)
-        TabSettings.objects.create(key="lenient_late", value=0)  # why didn't someone add this earlier?
+        TabSettings.objects.create(key="lenient_late", value=0)
 
     except Exception as e:
         return render_to_response('error.html',
                                   {'error_type': "Could not Start Tournament",
                                    'error_name': "",
                                    'error_info': "Invalid Tournament State. "
-                                                 "Time to hand tab. You have my condolences. [%s]" % (
-                                                     e)},
+                                                 "Time to hand tab. [ http://www.csun.edu/~dgw61315/handtab.html ] "
+                                                 "You have my condolences. [%s]" % e},
                                   context_instance=RequestContext(request))
 
     return render_to_response('thanks.html',

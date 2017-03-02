@@ -2,10 +2,11 @@
 
 import random
 
-from mittab.apps.tab.models import Round, RoundStats
+from mittab.apps.tab.models import Round, RoundStats, Judge, CheckIn, Room, TabSettings
 
 # Speaks every quarter point
 speak_range = [23 + .25 * i for i in range(17)]
+
 
 def generate_speaks_for_debater(debater, is_forfeit=False):
     """
@@ -30,6 +31,7 @@ def generate_speaks_for_debater(debater, is_forfeit=False):
     # Limit to 0 -> len(speak_range) - 1
     sampled_speak = max(min(sampled_speak, len(speak_range) - 1), 0)
     return speak_range[sampled_speak]
+
 
 def generate_result_for_round(round_obj, prob_forfeit=0.0, prob_ironman=0.0):
     """
@@ -101,11 +103,13 @@ def generate_result_for_round(round_obj, prob_forfeit=0.0, prob_ironman=0.0):
 
     # Generate RoundStats, shuffle for role randomization
     random.shuffle(all_points)
-    gov_roles, opp_roles = ['pm', 'mg'], ['lo', 'mo']
+    gov_roles = ['pm', 'mg']
+    opp_roles = ['lo', 'mo']
     round_stats = []
     for debater, points in all_points:
         role = ''
         if debater in gov_debaters:
+
             role = gov_roles.pop()
         else:
             role = opp_roles.pop()
@@ -127,3 +131,33 @@ def generate_results(round_number, prob_forfeit=0.0,
         for result in results:
             result.save()
 
+
+def check_in_all_judges(start, finish):
+    """Checks in all judges for rounds 'start' to 'finish'. Avoids duplicate check ins. If duplicates are detected, it
+    deletes those duplicates until it is no longer duplicated."""
+    for j in Judge.objects.all():
+        for x in range(start, finish + 1):
+            if CheckIn.objects.filter(judge=j, round_number=x).count() == 0:
+                ci = CheckIn(judge=j, round_number=x)
+                ci.save()
+
+            elif CheckIn.objects.filter(judge=j, round_number=x).count() != 1:
+                difference = CheckIn.objects.filter(judge=j, round_number=x).count() - 1
+                all_checkins = CheckIn.objects.filter(judge=j, round_number=x).all()
+                for i in range(0, difference):
+                    ci = all_checkins[i]
+                    ci.delete()
+
+
+def checkin_all_judges_all_rounds():
+    check_in_all_judges(1, 5)
+
+
+def create_rooms(num_rooms):
+    """Creates new rooms based on the number of rooms specified. Each room is created """
+    stepping = 10 / num_rooms
+    for x in range(0, num_rooms):
+        gen_name = "Room " + str(x + 1)
+        gen_rank = round(10 - stepping * x, 2)
+        room = Room(name=gen_name, rank=gen_rank)
+        room.save()
