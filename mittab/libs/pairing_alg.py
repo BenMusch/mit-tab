@@ -87,7 +87,7 @@ def calc_weight(team_a,
             return default
     current_round = try_get("cur_round", 1)
     tot_rounds = try_get("tot_rounds", 5)
-    power_pairing_multiple = try_get("power_pairing_multiple", -1)
+    power_pairing_multiple = try_get("power_pairing_multiple", -100)
     high_opp_penalty = try_get("high_opp_penalty", 0)
     high_gov_penalty = try_get("high_gov_penalty", -100)
     high_high_opp_penalty = try_get("higher_opp_penalty", -10)
