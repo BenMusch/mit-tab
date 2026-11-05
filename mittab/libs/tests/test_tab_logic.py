@@ -118,5 +118,10 @@ class TestPairingLogic(TestCase):
         last_round = 6
         for _ in range(1, last_round):
             self.check_pairing(self.round_number(), last_round)
+            matchups = set()
+            for debate in Round.objects.all():
+                matchup = frozenset([debate.gov_team_id, debate.opp_team_id])
+                self.assertNotIn(matchup, matchups)
+                matchups.add(matchup)
 
 

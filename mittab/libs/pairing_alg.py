@@ -22,6 +22,7 @@ import tab_logic
 from mittab.apps.tab.models import *
 import mwmatching
 import random
+import errors
 
 def perfect_pairing(list_of_teams):
     """ Uses the mwmatching library to assign teams in a pairing """
@@ -31,7 +32,7 @@ def perfect_pairing(list_of_teams):
         # may want to change actual penalties
         # a team should not have an edge back to itself
         # nor do we need to calculate an edge from a to b and b to a
-            if i > j:
+            if i > j and not tab_logic.hit_before(list_of_teams[i], list_of_teams[j]):
                 wt = calc_weight(list_of_teams[i],
                                  list_of_teams[j], i, j,
                                  list_of_teams[len(list_of_teams) - i - 1],
@@ -41,6 +42,12 @@ def perfect_pairing(list_of_teams):
                 # Add the edge to the graph
                 graph_edges += [(i,j,wt)]
     pairings_num = mwmatching.maxWeightMatching(graph_edges, maxcardinality=True)
+    # Isolated trailing teams may be omitted entirely by the matcher; other
+    # unmatched teams have a mate of -1. Neither is a complete legal pairing.
+    if len(pairings_num) != len(list_of_teams) or -1 in pairings_num:
+        raise errors.PairingError(
+            "Could not pair all teams without repeating a matchup. "
+            "Adjust the brackets before pairing again.")
     #print "Pairing numbers"
     #print pairings_num
     all_pairs = []
@@ -93,7 +100,6 @@ def calc_weight(team_a,
     high_high_opp_penalty = try_get("higher_opp_penalty", -10)
     same_school_penalty = try_get("same_school_penalty", -1000)
     hit_pull_up_before = try_get("hit_pull_up_before", -10000)
-    hit_team_before = try_get("hit_team_before", -100000)
     
     # Penalize for being far away from ideal power pairings
     if current_round == 1:
@@ -125,10 +131,6 @@ def calc_weight(team_a,
     if (tab_logic.hit_pull_up(team_a) and tab_logic.tot_wins(team_b) < tab_logic.tot_wins(team_a)) or (tab_logic.hit_pull_up(team_b) and tab_logic.tot_wins(team_a) < tab_logic.tot_wins(team_b)):
         wt += hit_pull_up_before
 
-    # Penalize for teams hitting each other before 
-    if tab_logic.hit_before(team_a, team_b):
-        wt += hit_team_before
-        
     return wt
 
 
