@@ -19,6 +19,7 @@
 #THE SOFTWARE.
 
 import tab_logic
+import errors
 from mittab.apps.tab.models import *
 import mwmatching
 import random
@@ -50,7 +51,13 @@ def perfect_pairing(list_of_teams):
                 all_pairs +=[[list_of_teams[pairings_num.index(pair)], list_of_teams[pair]]]
                 #print "all pairs"
                 #print all_pairs
-    #print all_pairs
+    # Do not silently adjust power pairings to avoid school conflicts.
+    # Let the tab director resolve the conflict before any rounds are saved.
+    for team_a, team_b in all_pairs:
+        if team_a.school == team_b.school:
+            raise errors.SameSchoolPairingError(
+                "Cannot pair %s against %s: both teams are from %s." %
+                (team_a.name, team_b.name, team_a.school))
     return determine_gov_opp(all_pairs)
 
 #Determine the weight of the pairing between teamA and teamB, i.e. how bad it is
@@ -91,7 +98,6 @@ def calc_weight(team_a,
     high_opp_penalty = try_get("high_opp_penalty", 0)
     high_gov_penalty = try_get("high_gov_penalty", -100)
     high_high_opp_penalty = try_get("higher_opp_penalty", -10)
-    same_school_penalty = try_get("same_school_penalty", -1000)
     hit_pull_up_before = try_get("hit_pull_up_before", -10000)
     hit_team_before = try_get("hit_team_before", -100000)
     
@@ -116,10 +122,6 @@ def calc_weight(team_a,
     # a fourth gov to one of the teams
     if tab_logic.num_govs(team_a) >= half and tab_logic.num_govs(team_b) >= half:
         wt += high_gov_penalty
-        
-    # Penalize for teams being from the same school
-    if team_a.school == team_b.school:
-        wt += same_school_penalty
         
     # Penalize for team hitting pull-up more than once
     if (tab_logic.hit_pull_up(team_a) and tab_logic.tot_wins(team_b) < tab_logic.tot_wins(team_a)) or (tab_logic.hit_pull_up(team_b) and tab_logic.tot_wins(team_a) < tab_logic.tot_wins(team_b)):

@@ -7,6 +7,9 @@ class NoShowAssignmentError(Exception):
 class NotEnoughTeamsError(Exception):
     pass
 
+class SameSchoolPairingError(Exception):
+    pass
+
 class RoomAlreadyExistsError(Exception):
     pass
 
