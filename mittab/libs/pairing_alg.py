@@ -25,6 +25,8 @@ import random
 
 def perfect_pairing(list_of_teams):
     """ Uses the mwmatching library to assign teams in a pairing """
+    if len(list_of_teams) % 2:
+        raise ValueError("Cannot pair an uneven number of teams")
     graph_edges = []
     for i in range(len(list_of_teams)):
         for j in range(len(list_of_teams)):
@@ -41,6 +43,8 @@ def perfect_pairing(list_of_teams):
                 # Add the edge to the graph
                 graph_edges += [(i,j,wt)]
     pairings_num = mwmatching.maxWeightMatching(graph_edges, maxcardinality=True)
+    if len(pairings_num) != len(list_of_teams) or -1 in pairings_num:
+        raise ValueError("Could not find a pairing for every team")
     #print "Pairing numbers"
     #print pairings_num
     all_pairs = []
