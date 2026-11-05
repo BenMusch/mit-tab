@@ -47,7 +47,7 @@ def pair_round():
     TabSettings.set('pairing_released', 0)
 
     # Need a reproduceable random pairing order
-    random.seed(0xBEEF)
+    random.seed(0xCAFE)
 
     # add scratches for teams/judges from the same school
     # NOTE that this only happens if they haven't already been added
