@@ -41,6 +41,10 @@ def perfect_pairing(list_of_teams):
                 # Add the edge to the graph
                 graph_edges += [(i,j,wt)]
     pairings_num = mwmatching.maxWeightMatching(graph_edges, maxcardinality=True)
+    # Unmatched vertices are -1; edgeless graphs may omit vertices entirely.
+    # Reject both before a negative index can be treated as the last team.
+    if len(pairings_num) != len(list_of_teams) or -1 in pairings_num:
+        raise ValueError("Could not pair all teams in the bracket")
     #print "Pairing numbers"
     #print pairings_num
     all_pairs = []
