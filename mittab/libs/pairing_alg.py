@@ -89,11 +89,11 @@ def calc_weight(team_a,
     tot_rounds = try_get("tot_rounds", 5)
     power_pairing_multiple = try_get("power_pairing_multiple", -1)
     high_opp_penalty = try_get("high_opp_penalty", 0)
-    high_gov_penalty = try_get("high_gov_penalty", -100)
-    high_high_opp_penalty = try_get("higher_opp_penalty", -10)
-    same_school_penalty = try_get("same_school_penalty", -1000)
-    hit_pull_up_before = try_get("hit_pull_up_before", -10000)
-    hit_team_before = try_get("hit_team_before", -100000)
+    high_gov_penalty = try_get("high_gov_penalty", -10000)
+    high_high_opp_penalty = try_get("higher_opp_penalty", -1000)
+    same_school_penalty = try_get("same_school_penalty", -100000)
+    hit_pull_up_before = try_get("hit_pull_up_before", -1000000)
+    hit_team_before = try_get("hit_team_before", -10000000)
     
     # Penalize for being far away from ideal power pairings
     if current_round == 1:
