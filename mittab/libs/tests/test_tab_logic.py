@@ -7,6 +7,7 @@ from mittab.apps.tab.models import TabSettings
 from mittab.apps.tab.models import Round
 import mittab.libs.assign_judges as assign_judges
 import mittab.libs.tab_logic as tab_logic
+import mittab.libs.pairing_alg as pairing_alg
 from mittab.libs.tests.assertion import assert_nearly_equal
 from mittab.libs.tests.data.load_data import load_debater_rankings
 from mittab.libs.tests.data.load_data import load_team_rankings
@@ -52,6 +53,33 @@ class TestRankingLogic(TestCase):
             msg = "{} - {}, {}".format(k, left, right)
             [assert_nearly_equal(*pair, message=msg) for pair
              in zip(set(left), set(right))]
+
+class TestPairingWeights(TestCase):
+    fixtures = ['testing_db']
+
+    def test_school_affiliation_does_not_affect_weight(self):
+        team_a, team_b = list(Team.objects.all()[:2])
+        other_school = team_b.school
+        if other_school == team_a.school:
+            other_school = type(team_a.school).objects.exclude(
+                pk=team_a.school_id)[0]
+
+        # Both the default and a persisted legacy override must be ignored,
+        # in seeded first-round and subsequent power-paired rounds alike.
+        for current_round in (1, 2):
+            TabSettings.set('cur_round', current_round)
+            for penalty in (None, -1000, -5000, 5000):
+                TabSettings.objects.filter(key='same_school_penalty').delete()
+                if penalty is not None:
+                    TabSettings.set('same_school_penalty', penalty)
+                team_b.school = team_a.school
+                same_school_weight = pairing_alg.calc_weight(
+                    team_a, team_b, 0, 1, team_b, team_a, 1, 0)
+                team_b.school = other_school
+                different_school_weight = pairing_alg.calc_weight(
+                    team_a, team_b, 0, 1, team_b, team_a, 1, 0)
+                self.assertEqual(same_school_weight, different_school_weight)
+
 
 class TestPairingLogic(TestCase):
     """
